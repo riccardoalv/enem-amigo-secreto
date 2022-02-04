@@ -1,57 +1,78 @@
 use rand::Rng;
 
-pub fn main() {
-    let rodadas = 1000000000;
-    let mut casos_favoraveis = 0;
+fn main() {
+    let rounds = 1000000000;
+    let mut favorable_cases = 0;
 
-    for _ in 1..rodadas {
-        let mut ordem = criar_lista();
+    for _ in 1..rounds {
+        let mut order = create_order();
 
-        while ordem.iter().filter(|&n| *n == ordem[ordem.len() - 2]).count() == 2 {
-            ordem = criar_lista()
-        }
+        while !order_is_valid(&order) {
+            order = create_order()
+        };
 
-        if ordem[0] == 0 && ordem[ordem.len() - 1] == 1 || ordem[ordem.len()  - 1] == 0 && ordem[0] == 1 {
-            casos_favoraveis += 1
+        if order[0] == 0 && order[order.len() - 1] == 1
+            || order[order.len() - 1] == 0 && order[0] == 1
+        {
+            favorable_cases += 1
         }
     }
-    println!("{}", casos_favoraveis)
+    println!("{}", favorable_cases)
 }
 
-fn criar_lista() -> Vec<i32> {
-    let mut ordem: Vec<i32> = Vec::new();
-    let mut lista = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+fn order_is_valid(order: &Vec<i32>) -> bool {
+    let mut isvalid = true;
 
+    if order
+        .iter()
+        .filter(|&n| *n == order[order.len() - 2])
+        .count()
+        == 2
+    {
+        isvalid = false;
+    }
+    isvalid
+}
+
+fn choice(list: &Vec<i32>) -> i32 {
     let mut rng = rand::thread_rng();
+    let num = rng.gen_range(0..list.len());
+    list[num]
+}
 
-    let mut num = rng.gen_range(0..lista.len());
-    let mut a = lista[num];
+fn create_order() -> Vec<i32> {
+    let mut order = Vec::new();
+    let mut list_of_persons = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-    ordem.push(a);
+    let mut person1 = choice(&list_of_persons);
+    order.push(person1);
 
     loop {
-        num = rng.gen_range(0..lista.len());
-        let mut b = lista[num];
+        let mut person2 = choice(&list_of_persons);
 
-        if lista.len() == 1 {
-            ordem.push(lista[0]);
-            break
+        if list_of_persons.len() == 1 {
+            order.push(list_of_persons[0]);
+            break;
         }
 
-        while a == b {
-            num = rng.gen_range(0..lista.len());
-            b = lista[num];
+        while person1 == person2 {
+            person2 = choice(&list_of_persons)
         }
 
-        a = b;
+        person1 = person2;
 
-        if ordem.iter().filter(|&n| *n == ordem[ordem.len() - 1]).count() == 2 {
-            ordem.push(b);
-
+        if order
+            .iter()
+            .filter(|&n| *n == order[order.len() - 1])
+            .count()
+            == 2
+        {
+            order.push(person2);
         } else {
-            lista.remove(num);
-            ordem.push(b);
+            let index = list_of_persons.iter().position(|&r| r == person2).unwrap();
+            list_of_persons.remove(index);
+            order.push(person2);
         }
     }
-    return ordem;
+    order
 }
